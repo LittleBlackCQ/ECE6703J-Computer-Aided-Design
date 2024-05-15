@@ -5,7 +5,7 @@ enum GateType {
     PRIMARY, AND, OR, NAND, NOR, XOR, XNOR, NOT, BUF
 };
 
-std::unordered_map<const std::string, const GateType> GateNamesUpper = {
+std::unordered_map<std::string, GateType> GateNamesUpper = {
     {"AND", AND}, 
     {"OR", OR},
     {"NAND", NAND},
@@ -16,7 +16,7 @@ std::unordered_map<const std::string, const GateType> GateNamesUpper = {
     {"BUF", BUF}
 };
 
-std::unordered_map<const std::string, const GateType> GateNamesLower = {
+std::unordered_map<std::string, GateType> GateNamesLower = {
     {"and", AND}, 
     {"or", OR},
     {"nand", NAND},

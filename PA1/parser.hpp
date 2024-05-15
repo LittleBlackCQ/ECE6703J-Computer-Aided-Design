@@ -13,6 +13,7 @@ public:
         std::vector<std::string> ins;
         std::vector<std::string> outs;
 
+        Node() : gate(PRIMARY), ins(std::vector<std::string>()), outs(std::vector<std::string>()) {};
         Node(GateType g, std::vector<std::string> i, std::vector<std::string> o)
             : gate(g), ins(i), outs(o) {}
     };
@@ -20,11 +21,19 @@ public:
     typedef std::unordered_map<std::string, Node> DAGraph;
 
     DAGraph rt;
+    Parser() = delete;
+    Parser(const std::string& bench_file);
+
+private:
     std::string remove_spaces(const std::string& str);
     void parse_bench(const std::string& bench_file);
     void parse_val();
 
 };
+
+Parser::Parser(const std::string& bench_file) {
+    parse_bench(bench_file);
+}
 
 std::string Parser::remove_spaces(const std::string& str) {
     std::string rt;
@@ -41,7 +50,7 @@ std::string Parser::remove_spaces(const std::string& str) {
 }
 
 void Parser::parse_bench(const std::string& bench_file) {
-    
+
     std::ifstream ifs(bench_file, std::ios::in);
     if (ifs.is_open()) {
         std::string line;
@@ -52,7 +61,7 @@ void Parser::parse_bench(const std::string& bench_file) {
                 // write input and output gates
                 size_t left_brkt = line.find('(');
                 size_t right_brkt = line.find(')');
-                if (line.substr(0, left_brkt-1) == "INPUT") {
+                if (line.substr(0, left_brkt) == "INPUT") {
                     std::string name = line.substr(left_brkt+1, right_brkt-left_brkt-1);
                     rt.insert({name, Node(PRIMARY, std::vector<std::string>(), std::vector<std::string>())});
                 }
@@ -78,7 +87,7 @@ void Parser::parse_bench(const std::string& bench_file) {
                     ins.push_back(in_name);
                     rt[in_name].outs.push_back(name);
                     start = pos + 1;
-                    pos = line.find(',');
+                    pos = line.find(',', start);
                 }
                 pos = line.find(')');
                 std::string in_name = line.substr(start, pos-start);
