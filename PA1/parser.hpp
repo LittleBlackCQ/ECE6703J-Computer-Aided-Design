@@ -6,15 +6,20 @@
 #include <unordered_map>
 #include "gate.hpp"
 
+#pragma once
+
 class Parser {
 public:
     struct Node {
-        GateType gate;
+        Gate::GateType gate;
         std::vector<std::string> ins;
         std::vector<std::string> outs;
 
-        Node() : gate(PRIMARY), ins(std::vector<std::string>()), outs(std::vector<std::string>()) {};
-        Node(GateType g, std::vector<std::string> i, std::vector<std::string> o)
+        bool tmp_val = false;
+        unsigned num_ins = 0;
+
+        Node() : gate(Gate::PRIMARY), ins(std::vector<std::string>()), outs(std::vector<std::string>()) {};
+        Node(Gate::GateType g, std::vector<std::string> i, std::vector<std::string> o)
             : gate(g), ins(i), outs(o) {}
     };
 
@@ -22,17 +27,20 @@ public:
 
     DAGraph rt;
     Parser() = delete;
-    Parser(const std::string& bench_file);
+    Parser(const std::string&, const std::string&);
+
+    void print_output();
 
 private:
-    std::string remove_spaces(const std::string& str);
-    void parse_bench(const std::string& bench_file);
-    void parse_val();
-
+    std::vector<std::string> output_queue;
+    std::string remove_spaces(const std::string&);
+    void parse_bench(const std::string&);
+    void parse_val(const std::string&);
 };
 
-Parser::Parser(const std::string& bench_file) {
+Parser::Parser(const std::string& bench_file, const std::string& val_file) {
     parse_bench(bench_file);
+    parse_val(val_file);
 }
 
 std::string Parser::remove_spaces(const std::string& str) {
@@ -63,7 +71,9 @@ void Parser::parse_bench(const std::string& bench_file) {
                 size_t right_brkt = line.find(')');
                 if (line.substr(0, left_brkt) == "INPUT") {
                     std::string name = line.substr(left_brkt+1, right_brkt-left_brkt-1);
-                    rt.insert({name, Node(PRIMARY, std::vector<std::string>(), std::vector<std::string>())});
+                    rt.insert({name, Node(Gate::PRIMARY, std::vector<std::string>(), std::vector<std::string>())});
+                } else if (line.substr(0, left_brkt) == "OUTPUT") {
+                    output_queue.push_back(line.substr(left_brkt+1, right_brkt-left_brkt-1));
                 }
             } else {
                 // write internal gates
@@ -74,11 +84,11 @@ void Parser::parse_bench(const std::string& bench_file) {
                 std::string name = line.substr(0, eq);
 
                 std::string gate_name = line.substr(eq+1, start-eq-1);
-                GateType gate_type;
-                if (GateNamesUpper.find(gate_name) != GateNamesUpper.end()) 
-                    gate_type = GateNamesUpper[gate_name];
+                Gate::GateType gate_type;
+                if (Gate::GateNamesUpper.find(gate_name) != Gate::GateNamesUpper.end()) 
+                    gate_type = Gate::GateNamesUpper[gate_name];
                 else 
-                    gate_type = GateNamesLower[gate_name];
+                    gate_type = Gate::GateNamesLower[gate_name];
 
                 std::vector<std::string> ins;
                 start += 1;
@@ -96,5 +106,24 @@ void Parser::parse_bench(const std::string& bench_file) {
                 rt.insert({name, Node(gate_type, ins, std::vector<std::string>())});
             }
         }
+    }
+}
+
+void Parser::parse_val(const std::string& val_file) {
+
+    std::ifstream ifs(val_file, std::ios::in);
+    if (ifs.is_open()) {
+        std::string line;
+        while (std::getline(ifs, line)) {
+            size_t space = line.find(' ');
+            std::string name = line.substr(0, space);
+            rt[name].tmp_val = line.substr(space+1) == "0" ? false : true;
+        }
+    }
+}
+
+void Parser::print_output() {
+    for (auto output : output_queue) {
+        std::cout << output << " " << rt[output].tmp_val << std::endl;
     }
 }

@@ -1,11 +1,20 @@
 #include <string>
 #include <unordered_map>
 
-enum GateType {
-    PRIMARY, AND, OR, NAND, NOR, XOR, XNOR, NOT, BUF
+#pragma once
+
+class Gate {
+public:
+    enum GateType {
+        PRIMARY, AND, OR, NAND, NOR, XOR, XNOR, NOT, BUF
+    };
+
+    static std::unordered_map<std::string, GateType> GateNamesUpper;
+
+    static std::unordered_map<std::string, GateType> GateNamesLower;
 };
 
-std::unordered_map<std::string, GateType> GateNamesUpper = {
+std::unordered_map<std::string, Gate::GateType> Gate::GateNamesUpper = {
     {"AND", AND}, 
     {"OR", OR},
     {"NAND", NAND},
@@ -16,7 +25,7 @@ std::unordered_map<std::string, GateType> GateNamesUpper = {
     {"BUF", BUF}
 };
 
-std::unordered_map<std::string, GateType> GateNamesLower = {
+std::unordered_map<std::string, Gate::GateType> Gate::GateNamesLower = {
     {"and", AND}, 
     {"or", OR},
     {"nand", NAND},

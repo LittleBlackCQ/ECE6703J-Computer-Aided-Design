@@ -1,9 +1,17 @@
 #include "parser.hpp"
+#include "topological_sort.hpp"
 #include <iostream>
 
 int main(int argc, char *argv[]) {
+    if (argc < 3) return 0;
+
     std::string benchfile(argv[1]);
-    Parser parser(benchfile);
-    std::cout << parser.rt["G1gat"].gate << "; " << parser.rt["G1gat"].outs[0] << std::endl;
+    std::string valfile(argv[2]);
+
+    Parser parser(benchfile, valfile);
+    TopolocigalSort sort;
+    sort.calculate_output(parser.rt);
+    
+    parser.print_output();
     return 0;
 }
