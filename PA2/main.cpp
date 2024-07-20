@@ -18,7 +18,7 @@ int main(int argc, char* argv[]) {
     inputFile >> cl;
     inputFile.close();
 
-    std::cout << !cl << std::endl;
+    std::cout << !cl;
 
     return 0;
 }
